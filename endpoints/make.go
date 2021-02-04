@@ -36,8 +36,8 @@ func makeGetMultipleEndpoint(s service.Service) endpoint.Endpoint {
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(NewPostRequest)
-		err := s.Create(ctx, req.NewPost)
-		response := PostResponse{Posts: nil, Success: 1, Message: "Posts found!"}
+		err := s.Create(ctx, req.UserID, req.NewPost)
+		response := PostResponse{Posts: nil, Success: 1, Message: "Post Created!"}
 		if err != nil {
 			response.Success = 0
 			response.Message = err.Error()
@@ -48,8 +48,8 @@ func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 func makeDeleteEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(PostRequest)
-		err := s.Delete(ctx, req.ID)
-		response := PostResponse{Posts: nil, Success: 1, Message: "Posts found!"}
+		err := s.Delete(ctx, req.UserID, req.ID)
+		response := PostResponse{Posts: nil, Success: 1, Message: "Post Deleted!"}
 		if err != nil {
 			response.Success = 0
 			response.Message = err.Error()

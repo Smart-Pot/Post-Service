@@ -21,11 +21,13 @@ type PostResponse struct {
 }
 
 type PostRequest struct {
-	ID string
+	ID     string
+	UserID string
 }
 
 type NewPostRequest struct {
 	NewPost data.Post
+	UserID  string
 }
 
 func MakeEndpoints(s service.Service) Endpoints {

@@ -2,16 +2,31 @@ package data
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Post struct {
-	ID     string
-	UserID string
-	Images []string
-	Date   string
+	ID      string   `json:"id"`
+	UserID  string   `json:"userId" validate:"required"`
+	EnvData EnvData  `json:"envData" validate:"required"`
+	Images  []string `json:"images" validate:"required"`
+	Date    string   `json:"-"`
+}
+
+type EnvData struct {
+	Humidity    string `json:"humidity" validate:"required"`
+	Temperature string `json:"temperature" validate:"required"`
+	Light       string `json:"light" validate:"required"`
+}
+
+func (p *Post) Validate() error {
+	v := validator.New()
+	return v.Struct(p)
 }
 
 func findPosts(ctx context.Context, key, value string) ([]*Post, error) {
@@ -47,20 +62,31 @@ func GetUsersPosts(ctx context.Context, userID string) ([]*Post, error) {
 }
 
 func GetPost(ctx context.Context, postID string) ([]*Post, error) {
-	posts, err := findPosts(ctx, "postid", postID)
+	posts, err := findPosts(ctx, "id", postID)
+
+	if len(posts) <= 0 {
+		return nil, errors.New("post not found")
+	}
 
 	return posts, err
 }
 
 func CreatePost(ctx context.Context, p Post) error {
 	p.Date = time.Now().UTC().String()
+	p.ID = generateID()
 	_, err := collection.InsertOne(ctx, p)
 
 	return err
 }
 
 func DeletePost(ctx context.Context, postID string) error {
-	_, err := collection.DeleteOne(ctx, bson.M{"postid": postID})
-
+	r, err := collection.DeleteOne(ctx, bson.M{"id": postID})
+	if r.DeletedCount <= 0 {
+		return errors.New("post not found")
+	}
 	return err
+}
+
+func generateID() string {
+	return uuid.NewString()
 }

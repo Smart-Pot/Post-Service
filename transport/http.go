@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const userIDTag = "x-user-id"
+
 func MakeHTTPHandlers(e endpoints.Endpoints, logger log.Logger) http.Handler {
 	r := mux.NewRouter().PathPrefix("/post/").Subrouter()
 
@@ -28,7 +30,7 @@ func MakeHTTPHandlers(e endpoints.Endpoints, logger log.Logger) http.Handler {
 		options...,
 	))
 
-	r.Methods("GET").Path("/post/{id}").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/{id}").Handler(httptransport.NewServer(
 		e.GetSingle,
 		decodePostHTTPRequest,
 		encodeHTTPResponse,
@@ -67,7 +69,8 @@ func decodePostHTTPRequest(_ context.Context, r *http.Request) (interface{}, err
 	}
 
 	return endpoints.PostRequest{
-		ID: id,
+		ID:     id,
+		UserID: r.Header.Get(userIDTag),
 	}, nil
 
 }
@@ -80,6 +83,7 @@ func decodeNewPostHTTPRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 	return endpoints.NewPostRequest{
 		NewPost: c,
+		UserID:  r.Header.Get(userIDTag),
 	}, nil
 
 }

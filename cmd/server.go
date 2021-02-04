@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	logg "log"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 
 func startServer() error {
 	// Defining Logger
+	fmt.Println("Server starting...")
 	var logger log.Logger
 	logger = log.NewJSONLogger(os.Stdout)
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
@@ -34,5 +36,6 @@ func startServer() error {
 		WriteTimeout: 10 * time.Second,        // max time to write response to the client
 		IdleTimeout:  120 * time.Second,       // max time for connections using TCP Keep-Alive
 	}
+
 	return s.ListenAndServe()
 }
