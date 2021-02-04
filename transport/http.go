@@ -14,7 +14,7 @@ import (
 )
 
 func MakeHTTPHandlers(e endpoints.Endpoints, logger log.Logger) http.Handler {
-	r := mux.NewRouter()
+	r := mux.NewRouter().PathPrefix("/post/").Subrouter()
 
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
