@@ -15,7 +15,7 @@ type Post struct {
 	UserID  string   `json:"userId" validate:"required"`
 	EnvData EnvData  `json:"envData" validate:"required"`
 	Images  []string `json:"images" validate:"required"`
-	Date    string   `json:"-"`
+	Date    string   `json:"date"`
 }
 
 type EnvData struct {
