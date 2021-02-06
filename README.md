@@ -51,7 +51,6 @@
 
     ```js
         {
-            "id": string,
             "userId": string,
             "envData":
             {
@@ -60,7 +59,6 @@
                 "light": string,
             },
             "images": string[],
-            "date": string
         }
     ```
 - returns:
