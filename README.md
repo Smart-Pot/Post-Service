@@ -51,7 +51,6 @@
 
     ```js
         {
-            "id": string,
             "userId": string,
             "envData":
             {
