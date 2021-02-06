@@ -6,12 +6,15 @@ import (
 	"postservice/data"
 	"time"
 
+	"github.com/Smart-Pot/pkg/adapter/amqp"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 )
 
 type service struct {
-	logger log.Logger
+	logger   log.Logger
+	producer amqp.Producer
 }
 
 type Service interface {
@@ -19,12 +22,29 @@ type Service interface {
 	GetMultiple(ctx context.Context, userID string) ([]*data.Post, error)
 	Create(ctx context.Context, userID string, newPost data.Post) error
 	Delete(ctx context.Context, userID, postID string) error
+	Vote(ctx context.Context, userID, postID string) error
 }
 
 func NewService(logger log.Logger) Service {
-	return &service{
-		logger: logger,
+	p, err := amqp.MakeProducer("DeletePostComments")
+	if err != nil {
+		panic(err)
 	}
+	return &service{
+		logger:   logger,
+		producer: p,
+	}
+}
+
+func (s service) Vote(ctx context.Context, userID, postID string) error {
+	defer func(beginTime time.Time) {
+		level.Info(s.logger).Log(
+			"function", "Vote",
+			"param:userID", userID,
+			"param:commentID", postID,
+			"took", time.Since(beginTime))
+	}(time.Now())
+	return data.Vote(ctx, userID, postID)
 }
 
 func (s service) GetSingle(ctx context.Context, postID string) (result []*data.Post, err error) {
@@ -91,5 +111,10 @@ func (s service) Delete(ctx context.Context, userID, postID string) (err error) 
 	if userID != post.UserID {
 		return errors.New("User can not delete comments of other users")
 	}
-	return data.DeletePost(ctx, postID)
+	err = data.DeletePost(ctx, postID)
+	if err != nil {
+		return err
+	}
+	s.producer.Produce([]byte(postID))
+	return err
 }

@@ -33,6 +33,19 @@ func makeGetMultipleEndpoint(s service.Service) endpoint.Endpoint {
 	}
 }
 
+func makeVoteEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(VoteRequest)
+		err := s.Vote(ctx, req.UserID, req.PostID)
+		response := PostResponse{Posts: nil, Success: 1, Message: "Vote successful!"}
+		if err != nil {
+			response.Success = 0
+			response.Message = err.Error()
+		}
+		return response, nil
+	}
+}
+
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(NewPostRequest)

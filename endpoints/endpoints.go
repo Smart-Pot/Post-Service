@@ -12,12 +12,18 @@ type Endpoints struct {
 	GetMultiple endpoint.Endpoint
 	Create      endpoint.Endpoint
 	Delete      endpoint.Endpoint
+	Vote        endpoint.Endpoint
 }
 
 type PostResponse struct {
 	Posts   []*data.Post
 	Success int32
 	Message string
+}
+
+type VoteRequest struct {
+	UserID string `json:"userId"`
+	PostID string `json:"postId"`
 }
 
 type PostRequest struct {
@@ -36,5 +42,6 @@ func MakeEndpoints(s service.Service) Endpoints {
 		GetMultiple: makeGetMultipleEndpoint(s),
 		Create:      makeCreateEndpoint(s),
 		Delete:      makeDeleteEndpoint(s),
+		Vote:        makeVoteEndpoint(s),
 	}
 }

@@ -15,6 +15,7 @@ type Post struct {
 	UserID  string   `json:"userId" validate:"required"`
 	EnvData EnvData  `json:"envData" validate:"required"`
 	Images  []string `json:"images" validate:"required"`
+	Like    []string `json:"like"`
 	Date    string   `json:"date"`
 }
 
@@ -74,9 +75,35 @@ func GetPost(ctx context.Context, postID string) ([]*Post, error) {
 func CreatePost(ctx context.Context, p Post) error {
 	p.Date = time.Now().UTC().String()
 	p.ID = generateID()
+	p.Like = []string{}
 	_, err := collection.InsertOne(ctx, p)
 
 	return err
+}
+
+func Vote(ctx context.Context, userID string, postID string) error {
+	res := collection.FindOne(ctx, bson.M{"id": postID})
+	var p Post
+	if err := res.Decode(&p); err != nil {
+		return err
+	}
+	p.Like = updateLikes(userID, p.Like)
+	filter := bson.M{"id": postID}
+	pushToArray := bson.M{"$set": bson.M{"like": p.Like}}
+	result, err := collection.UpdateOne(ctx, filter, pushToArray)
+	if result.ModifiedCount <= 0 {
+		return errors.New("vote failed!")
+	}
+	return err
+}
+
+func updateLikes(userID string, likes []string) []string {
+	for i, v := range likes {
+		if v == userID {
+			return append(likes[:i], likes[i+1:]...)
+		}
+	}
+	return append(likes, userID)
 }
 
 func DeletePost(ctx context.Context, postID string) error {
@@ -84,7 +111,11 @@ func DeletePost(ctx context.Context, postID string) error {
 	if r.DeletedCount <= 0 {
 		return errors.New("post not found")
 	}
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func generateID() string {

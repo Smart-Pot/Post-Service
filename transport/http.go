@@ -51,6 +51,13 @@ func MakeHTTPHandlers(e endpoints.Endpoints, logger log.Logger) http.Handler {
 		options...,
 	))
 
+	r.Methods("POST").Path("/vote").Handler(httptransport.NewServer(
+		e.Vote,
+		decodeVoteHTTPRequest,
+		encodeHTTPResponse,
+		options...,
+	))
+
 	return r
 }
 
@@ -73,6 +80,16 @@ func decodePostHTTPRequest(_ context.Context, r *http.Request) (interface{}, err
 		UserID: r.Header.Get(userIDTag),
 	}, nil
 
+}
+func decodeVoteHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req endpoints.VoteRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+	req.UserID = r.Header.Get(userIDTag)
+
+	return req, nil
 }
 
 func decodeNewPostHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
