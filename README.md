@@ -17,8 +17,8 @@
 ## Get single post
 - method: `GET`
 - path: `/post/{postId}`
-- return: 
-    ```json
+- returns: 
+    ```js
     {
         "Posts": []post, //use first element of array
         "Success": integer, // 1 for success, 0 for failure
@@ -30,8 +30,8 @@
 ## Get user's all posts
 - method: `GET`
 - path: `/post/user/{userID}`
-- return: 
-    ```json
+- returns: 
+    ```js
     {
         "Posts": []post,
         "Success": integer, // 1 for success, 0 for failure
@@ -39,11 +39,17 @@
     }
     ```
 
-## Create new post
-- method: `POST`
+## Create
 - path: `/post/new`
+- method: `POST`
 - parameters: 
-    ```json
+   * Header:
+  
+        |  Name | Description                           | Type   |
+        |:---------:|---------------------------------------|--------|
+        | x-auth-token | authentication token of the user  | String |
+
+    ```js
         {
             "id": string,
             "userId": string,
@@ -57,8 +63,8 @@
             "date": string
         }
     ```
-- return:
-    ```json
+- returns:
+    ```js
     {
         "Posts": []post, // Will return NULL
         "Success": integer, // 1 for success, 0 for failure
@@ -66,11 +72,18 @@
     }
     ```
 
-## Delete post
-- method: `DELETE`
+## Delete
 - path: `/post/{postId}`
-- return:
-    ```json
+- method: `DELETE`
+- params:
+   * Header:
+  
+        |  Name | Description                           | Type   |
+        |:---------:|---------------------------------------|--------|
+        | x-auth-token | authentication token of the user  | String |
+
+- returns:
+    ```js
     {
         "Posts": []post, // Will return NULL
         "Success": integer, // 1 for success, 0 for failure
