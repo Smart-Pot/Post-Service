@@ -59,7 +59,6 @@
                 "light": string,
             },
             "images": string[],
-            "date": string
         }
     ```
 - returns:
