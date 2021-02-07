@@ -3,6 +3,7 @@
     {
         "id": string,
         "userId": string,
+        "plant": string,
         "envData":
         {
             "humidity": string,
@@ -52,6 +53,7 @@
     ```js
         {
             "userId": string,
+            "plant": string,
             "envData":
             {
                 "humidity": string,

@@ -13,6 +13,7 @@ import (
 type Post struct {
 	ID      string   `json:"id"`
 	UserID  string   `json:"userId" validate:"required"`
+	Plant   string   `json:"plant" validate:"required"`
 	EnvData EnvData  `json:"envData" validate:"required"`
 	Images  []string `json:"images" validate:"required"`
 	Like    []string `json:"like"`
