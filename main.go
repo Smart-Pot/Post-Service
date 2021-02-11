@@ -6,14 +6,14 @@ import (
 	"os/signal"
 
 	"postservice/cmd"
-	"postservice/config"
 	"postservice/data"
 
+	"github.com/Smart-Pot/pkg"
 	"github.com/Smart-Pot/pkg/adapter/amqp"
 )
 
 func main() {
-	config.ReadConfig()
+	pkg.Config.ReadConfig()
 	err := amqp.Set("amqp://guest:guest@localhost:5672")
 	if err != nil {
 		log.Fatal(err)
