@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"postservice/data"
 	"postservice/endpoints"
+	"strconv"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/transport"
@@ -23,9 +24,9 @@ func MakeHTTPHandlers(e endpoints.Endpoints, logger log.Logger) http.Handler {
 		httptransport.ServerErrorEncoder(encodeError),
 	}
 
-	r.Methods("GET").Path("/user/{id}").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/user/{id}/{pagenumber}/{pagesize}").Handler(httptransport.NewServer(
 		e.GetMultiple,
-		decodePostHTTPRequest,
+		decodePostsHTTPRequest,
 		encodeHTTPResponse,
 		options...,
 	))
@@ -81,6 +82,30 @@ func decodePostHTTPRequest(_ context.Context, r *http.Request) (interface{}, err
 	}, nil
 
 }
+
+func decodePostsHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	id, idOK := vars["id"]
+	pn, pnOK := vars["pagenumber"]
+	ps, psOK := vars["pagesize"]
+
+	pagenumber, err := strconv.Atoi(pn)
+	pagesize, err := strconv.Atoi(ps)
+
+	if err != nil {
+		// TODO: handle error
+	}
+
+	if !idOK || !pnOK || !psOK {
+		// TODO: handle error
+	}
+	return endpoints.PostsRequest{
+		ID:         id,
+		PageNumber: pagenumber,
+		PageSize:   pagesize,
+	}, nil
+}
+
 func decodeVoteHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var req endpoints.VoteRequest
 

@@ -16,7 +16,7 @@ type Endpoints struct {
 }
 
 type PostResponse struct {
-	Posts   []*data.Post
+	Posts   interface{}
 	Success int32
 	Message string
 }
@@ -29,6 +29,12 @@ type VoteRequest struct {
 type PostRequest struct {
 	ID     string
 	UserID string
+}
+
+type PostsRequest struct {
+	ID         string
+	PageNumber int
+	PageSize   int
 }
 
 type NewPostRequest struct {

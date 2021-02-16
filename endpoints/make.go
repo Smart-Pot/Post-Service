@@ -22,8 +22,8 @@ func makeGetSingleEndpoint(s service.Service) endpoint.Endpoint {
 
 func makeGetMultipleEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(PostRequest)
-		result, err := s.GetMultiple(ctx, req.ID)
+		req := request.(PostsRequest)
+		result, err := s.GetMultiple(ctx, req.ID, req.PageNumber, req.PageSize)
 		response := PostResponse{Posts: result, Success: 1, Message: "Posts found!"}
 		if err != nil {
 			response.Success = 0

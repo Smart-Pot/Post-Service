@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Post struct {
@@ -18,6 +19,7 @@ type Post struct {
 	EnvData EnvData  `json:"envData" validate:"required"`
 	Images  []string `json:"images" validate:"required"`
 	Like    []string `json:"like"`
+	Deleted bool     `json:"deleted"`
 	Date    string   `json:"date"`
 }
 
@@ -32,9 +34,9 @@ func (p *Post) Validate() error {
 	return v.Struct(p)
 }
 
-func findPosts(ctx context.Context, key, value string) ([]*Post, error) {
+func findPosts(ctx context.Context, filter interface{}, opts *options.FindOptions) ([]*Post, error) {
 	var results []*Post
-	cur, err := collection.Find(ctx, bson.D{{key, value}})
+	cur, err := collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -58,14 +60,28 @@ func findPosts(ctx context.Context, key, value string) ([]*Post, error) {
 	return results, err
 }
 
-func GetUsersPosts(ctx context.Context, userID string) ([]*Post, error) {
-	posts, err := findPosts(ctx, "userid", userID)
+func GetUsersPosts(ctx context.Context, userID string, pageNumber, pageSize int) ([]*Post, error) {
+	skip := int64((pageNumber - 1) * pageSize)
+	limit := int64(pageSize)
+	opts := options.FindOptions{
+		Skip:  &skip,
+		Limit: &limit,
+	}
+	filter := bson.M{
+		"userid":  userID,
+		"deleted": false,
+	}
+	posts, err := findPosts(ctx, filter, &opts)
 
 	return posts, err
 }
 
 func GetPost(ctx context.Context, postID string) ([]*Post, error) {
-	posts, err := findPosts(ctx, "id", postID)
+	filter := bson.M{
+		"postid":  postID,
+		"deleted": false,
+	}
+	posts, err := findPosts(ctx, filter, nil)
 
 	if len(posts) <= 0 {
 		return nil, errors.New("post not found")
@@ -94,7 +110,7 @@ func Vote(ctx context.Context, userID string, postID string) error {
 	pushToArray := bson.M{"$set": bson.M{"like": p.Like}}
 	result, err := collection.UpdateOne(ctx, filter, pushToArray)
 	if result.ModifiedCount <= 0 {
-		return errors.New("vote failed!")
+		return errors.New("vote failed")
 	}
 	return err
 }
@@ -109,10 +125,27 @@ func updateLikes(userID string, likes []string) []string {
 }
 
 func DeletePost(ctx context.Context, postID string) error {
-	r, err := collection.DeleteOne(ctx, bson.M{"id": postID})
-	if r.DeletedCount <= 0 {
+	filter := bson.M{"id": postID}
+
+	updatePost := bson.M{"$set": bson.M{"deleted": true}}
+
+	res, err := collection.UpdateOne(ctx, filter, updatePost)
+	if err != nil {
+		return err
+	}
+
+	if res.ModifiedCount <= 0 {
 		return errors.New("post not found")
 	}
+
+	return nil
+}
+
+func DeletePosts(ctx context.Context, userID string) error {
+	filter := bson.M{"userid": userID}
+	updatePost := bson.M{"$set": bson.M{"deleted": true}}
+	_, err := collection.UpdateMany(ctx, filter, updatePost)
+
 	if err != nil {
 		return err
 	}
