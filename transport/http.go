@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"postservice/data"
 	"postservice/endpoints"
@@ -68,12 +69,11 @@ func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, response int
 }
 
 func decodePostHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
-
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 
 	if !ok {
-		// Handler error
+		return nil, errors.New("missing or wrong argument in request")
 	}
 
 	return endpoints.PostRequest{
@@ -93,11 +93,11 @@ func decodePostsHTTPRequest(_ context.Context, r *http.Request) (interface{}, er
 	pagesize, err := strconv.Atoi(ps)
 
 	if err != nil {
-		// TODO: handle error
+		return nil, errors.New("pagesize and pagenumber must be integer")
 	}
 
 	if !idOK || !pnOK || !psOK {
-		// TODO: handle error
+		return nil, errors.New("missing or wrong argument in request")
 	}
 	return endpoints.PostsRequest{
 		ID:         id,
