@@ -94,6 +94,7 @@ func CreatePost(ctx context.Context, p Post) error {
 	p.Date = time.Now().UTC().String()
 	p.ID = generateID()
 	p.Like = []string{}
+	p.Deleted = false
 	_, err := collection.InsertOne(ctx, p)
 
 	return err

@@ -2,12 +2,9 @@ FROM golang:latest
 
 WORKDIR /app
 
-COPY go.mod .
-COPY go.sum .
+COPY ./Post-Service .
 
 RUN go mod download
-
-COPY . .
 
 RUN go build .
 

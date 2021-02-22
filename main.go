@@ -14,7 +14,7 @@ import (
 
 func main() {
 	pkg.Config.ReadConfig()
-	err := amqp.Set("amqp://guest:guest@localhost:5672")
+	err := amqp.Set("amqp://guest:guest@rabbitmq:5672")
 	if err != nil {
 		log.Fatal(err)
 	}
