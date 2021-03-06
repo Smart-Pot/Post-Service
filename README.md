@@ -90,3 +90,20 @@
         "Message": string
     }
     ```
+## Vote
+- path: `/post/vote`
+- method: `POST`
+- params:
+   * Header:
+  
+        |  Name | Description                           | Type   |
+        |:---------:|---------------------------------------|--------|
+        | x-auth-token | authentication token of the user  | String |
+
+- returns:
+    ```js
+    {
+        "Posts": []post,
+        "success": integer,
+        "message" : string
+    }
