@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Smart-Pot/pkg/db"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,7 +37,7 @@ func (p *Post) Validate() error {
 
 func findPosts(ctx context.Context, filter interface{}, opts *options.FindOptions) ([]*Post, error) {
 	var results []*Post
-	cur, err := collection.Find(ctx, filter, opts)
+	cur, err := db.Collection().Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -95,13 +96,13 @@ func CreatePost(ctx context.Context, p Post) error {
 	p.ID = generateID()
 	p.Like = []string{}
 	p.Deleted = false
-	_, err := collection.InsertOne(ctx, p)
+	_, err := db.Collection().InsertOne(ctx, p)
 
 	return err
 }
 
 func Vote(ctx context.Context, userID string, postID string) error {
-	res := collection.FindOne(ctx, bson.M{"id": postID})
+	res := db.Collection().FindOne(ctx, bson.M{"id": postID})
 	var p Post
 	if err := res.Decode(&p); err != nil {
 		return err
@@ -109,7 +110,7 @@ func Vote(ctx context.Context, userID string, postID string) error {
 	p.Like = updateLikes(userID, p.Like)
 	filter := bson.M{"id": postID}
 	pushToArray := bson.M{"$set": bson.M{"like": p.Like}}
-	result, err := collection.UpdateOne(ctx, filter, pushToArray)
+	result, err := db.Collection().UpdateOne(ctx, filter, pushToArray)
 	if result.ModifiedCount <= 0 {
 		return errors.New("vote failed")
 	}
@@ -130,7 +131,7 @@ func DeletePost(ctx context.Context, postID string) error {
 
 	updatePost := bson.M{"$set": bson.M{"deleted": true}}
 
-	res, err := collection.UpdateOne(ctx, filter, updatePost)
+	res, err := db.Collection().UpdateOne(ctx, filter, updatePost)
 	if err != nil {
 		return err
 	}
@@ -145,7 +146,7 @@ func DeletePost(ctx context.Context, postID string) error {
 func DeletePosts(ctx context.Context, userID string) error {
 	filter := bson.M{"userid": userID}
 	updatePost := bson.M{"$set": bson.M{"deleted": true}}
-	_, err := collection.UpdateMany(ctx, filter, updatePost)
+	_, err := db.Collection().UpdateMany(ctx, filter, updatePost)
 
 	if err != nil {
 		return err
