@@ -27,6 +27,8 @@ func startServer() error {
 	endpoint := endpoints.MakeEndpoints(service)
 	handler := transport.MakeHTTPHandlers(endpoint, logger)
 
+	fmt.Println("HELLO", pkg.Config.Server.Address)
+
 	l := logg.New(os.Stdout, "COMMENT-SERVICE", 0)
 	// Set handler and listen given port
 	s := http.Server{

@@ -6,19 +6,26 @@ import (
 	"os/signal"
 
 	"postservice/cmd"
-	"postservice/data"
 
 	"github.com/Smart-Pot/pkg"
 	"github.com/Smart-Pot/pkg/adapter/amqp"
+	"github.com/Smart-Pot/pkg/db"
 )
 
 func main() {
-	pkg.Config.ReadConfig()
-	err := amqp.Set("amqp://guest:guest@rabbitmq:5672")
-	if err != nil {
+	if err := pkg.Config.ReadConfig(); err != nil {
 		log.Fatal(err)
 	}
-	data.DatabaseConnection()
+	log.Println("Configurations are set")
+	if err := db.Connect(db.PkgConfig("users")); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("DB Connection established")
+
+	if err := amqp.Set(pkg.Config.AMQPAddress); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("AMQP module is set")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill)
