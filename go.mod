@@ -3,7 +3,7 @@ module postservice
 go 1.15
 
 require (
-	github.com/Smart-Pot/pkg v0.0.0-20210425150306-2bb1da539be3
+	github.com/Smart-Pot/pkg v0.0.0-20210525104235-1f23a5cfa06d // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/universal-translator v0.17.0 // indirect
